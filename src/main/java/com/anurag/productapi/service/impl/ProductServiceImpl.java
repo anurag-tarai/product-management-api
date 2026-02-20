@@ -32,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductByIdDTO(Integer id) {
+    public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
         return ProductMapper.toProductResponse(product);
@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse createProductDTO(ProductRequest request) {
+    public ProductResponse createProduct(ProductRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Product product = ProductMapper.toProductEntity(request);
         if (product.getItems() != null) {
@@ -55,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse updateProductDTO(Integer id, ProductRequest request) {
+    public ProductResponse updateProduct(Integer id, ProductRequest request) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 

@@ -1,29 +1,38 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    container_name: zest-postgres
-    environment:
-      POSTGRES_DB: zest_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  api:
+  app:
     build: .
-    container_name: zest-api
+    container_name: product-api
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/zest_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/productdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       - db
+    networks:
+      - product-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: product-db
+    environment:
+      - POSTGRES_DB=productdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    networks:
+      - product-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  product-network:
+    driver: bridge
 
 volumes:
-  pgdata:
+  postgres_data:

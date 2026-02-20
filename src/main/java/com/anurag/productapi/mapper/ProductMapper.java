@@ -22,16 +22,19 @@ public class ProductMapper {
 
     public static ProductResponse toProductResponse(Product product) {
         if (product == null) return null;
+
         List<ItemResponse> items = null;
         if (product.getItems() != null) {
             items = product.getItems().stream()
                     .map(ProductMapper::toItemResponse)
                     .collect(Collectors.toList());
         }
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .productName(product.getProductName())
                 .createdBy(product.getCreatedBy())
+                .createdOn(product.getCreatedOn())       // <-- Add this
                 .modifiedBy(product.getModifiedBy())
                 .items(items)
                 .build();
