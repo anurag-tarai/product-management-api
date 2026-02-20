@@ -121,6 +121,14 @@ class ProductControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    void deleteProduct_WithUserRole_ReturnsForbidden() throws Exception {
+        mockMvc.perform(delete("/api/v1/products/{id}", 1)
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void deleteProduct_ReturnsNoContent() throws Exception {
         // Setup: Create a product first

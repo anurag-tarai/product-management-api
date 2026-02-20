@@ -1,6 +1,6 @@
 package com.anurag.productapi.security;
 
-import com.anurag.productapi.enums.Roles;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,51 +26,31 @@ public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
 
-    /**
-     * Dev profile: HTTP (no HTTPS enforcement) for local testing
-     */
     @Bean
-    @Profile("dev")
-    public SecurityFilterChain filterChainDev(HttpSecurity http) throws Exception {
-        configureCommon(http);
-        return http.build();
-    }
-
-    /**
-     * Prod profile: HTTPS enforced
-     */
-    @Bean
-    @Profile("prod")
-    public SecurityFilterChain filterChainProd(HttpSecurity http) throws Exception {
-        configureCommon(http);
-        http.requiresChannel(channel -> channel.anyRequest().requiresSecure()); // HTTPS enforcement
-        return http.build();
-    }
-
-    /**
-     * Common security configuration shared by both profiles
-     */
-    private void configureCommon(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Custom 401 for unauthenticated
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Missing or invalid token\"}"
+                            );
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers("/api/v1/products/**")
-                        .hasAnyRole(Roles.USER.name(), Roles.ADMIN.name())
                         .anyRequest()
-                        .authenticated()
+                        .authenticated() // All other endpoints require auth
                 );
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+        return http.build();
     }
 
     @Bean
@@ -81,12 +61,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // Restrict in production
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

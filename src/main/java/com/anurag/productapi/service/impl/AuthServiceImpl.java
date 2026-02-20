@@ -75,12 +75,15 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenService.verifyExpiration(refreshToken);
 
+        // ROTATION: Create a new refresh token (this invalidates the old one via deleteByUser)
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(refreshToken.getUser());
+
         String token =
                 jwtUtils.generateToken(refreshToken.getUser().getUsername());
 
         return new TokenRefreshResponse(
                 token,
-                refreshToken.getToken()
+                newRefreshToken.getToken()
         );
     }
 }

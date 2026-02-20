@@ -5,10 +5,10 @@ import com.anurag.productapi.dto.request.ProductRequest;
 import com.anurag.productapi.dto.response.ProductResponse;
 import com.anurag.productapi.entity.Item;
 import com.anurag.productapi.entity.Product;
+import com.anurag.productapi.exception.ResourceNotFoundException;
 import com.anurag.productapi.mapper.ProductMapper;
 import com.anurag.productapi.repository.ProductRepository;
 import com.anurag.productapi.service.ProductService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return ProductMapper.toProductResponse(product);
     }
 
@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse updateProduct(Integer id, ProductRequest request) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         existingProduct.setProductName(request.getProductName());
 
@@ -83,9 +83,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void deleteProduct(Integer id) {
-        if (!productRepository.existsById(id)) {
-            throw new EntityNotFoundException("Product not found with id: " + id);
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
         productRepository.deleteById(id);
     }
 }

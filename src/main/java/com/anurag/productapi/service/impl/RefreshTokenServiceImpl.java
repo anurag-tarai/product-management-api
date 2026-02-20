@@ -3,11 +3,13 @@ package com.anurag.productapi.service.impl;
 
 import com.anurag.productapi.entity.RefreshToken;
 import com.anurag.productapi.entity.User;
+import com.anurag.productapi.exception.TokenRefreshException;
 import com.anurag.productapi.repository.RefreshTokenRepository;
 import com.anurag.productapi.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,6 +24,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private Long refreshTokenDurationMs;
 
     @Override
+    @Transactional
     public RefreshToken createRefreshToken(User user) {
 
         repository.deleteByUser(user); // refresh token rotation
@@ -40,13 +43,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
             repository.delete(token);
-            throw new RuntimeException("Refresh token expired");
+            throw new TokenRefreshException(token.getToken(), "Refresh token was expired. Please make a new signin request");
         }
 
         return token;
     }
 
     @Override
+    @Transactional
     public void deleteByUser(User user) {
         repository.deleteByUser(user);
     }
@@ -55,6 +59,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken findByToken(String token) {
         return repository.findByToken(token)
                 .orElseThrow(() ->
-                        new RuntimeException("Refresh token not found"));
+                        new TokenRefreshException(token, "Refresh token is not in database!"));
     }
 }

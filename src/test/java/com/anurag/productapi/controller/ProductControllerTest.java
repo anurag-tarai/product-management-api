@@ -66,6 +66,19 @@ class ProductControllerTest {
     }
 
     @Test
+    void createProduct_WhenInvalidInput_ReturnsBadRequest() throws Exception {
+        ProductRequest request = ProductRequest.builder()
+                .productName("") // Invalid: Blank name
+                .items(Collections.emptyList())
+                .build();
+
+        mockMvc.perform(post("/api/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getProductById_WhenNotFound_ReturnsNotFound() throws Exception {
         when(productService.getProductById(999))
                 .thenThrow(new ResourceNotFoundException("Product not found with id: 999"));

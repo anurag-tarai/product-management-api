@@ -1,8 +1,5 @@
 package com.anurag.productapi.security;
 
-import com.anurag.productapi.security.JwtUtils;
-import com.anurag.productapi.security.UserDetailsImpl;
-import com.anurag.productapi.security.UserDetailsServiceImpl;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
@@ -27,31 +24,31 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String headerAuth = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
+        try {
+            if (header != null && header.startsWith("Bearer ")) {
+                String jwt = header.substring(7);
 
-            String jwt = headerAuth.substring(7);
-
-            if (jwtUtils.validateJwtToken(jwt)) {
+                if (!jwtUtils.validateJwtToken(jwt)) {
+                    throw new RuntimeException("Invalid or expired token");
+                }
 
                 String username = jwtUtils.getUsernameFromToken(jwt);
+                var userDetails = userDetailsService.loadUserByUsername(username);
 
-                UserDetailsImpl userDetails =
-                        (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
+        } catch (Exception e) {
+            // Missing or invalid token → 401
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"" + e.getMessage() + "\"}");
+            return; // Stop the chain
         }
 
         filterChain.doFilter(request, response);

@@ -17,6 +17,7 @@ public class Item {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(nullable = false)
     @Min(1)
     private Integer quantity;
 }

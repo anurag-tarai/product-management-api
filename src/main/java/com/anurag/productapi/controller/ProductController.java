@@ -110,6 +110,7 @@ public class ProductController {
             @ApiResponse(responseCode = "204", description = "Product deleted successfully", content = @Content),
             @ApiResponse(responseCode = "404", description = "Product not found", content = @Content)
     })
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
