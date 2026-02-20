@@ -1,82 +1,104 @@
 # Product Management API
 
-This is a RESTful API solution designed for managing products and their associated items. It provides full CRUD operations, secure authentication using JWT with refresh token rotation, and follows modern Spring Boot best practices.
+A robust, production-ready RESTful API for managing products and inventory, built with **Java 17** and **Spring Boot 3**. This project demonstrates modern backend development practices including **JWT Authentication with Refresh Token Rotation**, **Role-Based Access Control (RBAC)**, **Dockerization**, and **Clean Architecture**.
 
-## 🚀 Tech Stack
+---
 
-*   **Java 17+**
-*   **Spring Boot 3.x**
-*   **Spring Data JPA (Hibernate)**
-*   **PostgreSQL** (Production Database)
-*   **H2 Database** (Test Database)
-*   **Spring Security** (JWT & Refresh Token)
-*   **JUnit 5 & Mockito** (Testing)
-*   **Swagger/OpenAPI** (Documentation)
-*   **Docker & Docker Compose** (Containerization)
+## Key Features
 
-## 🏗 Architecture
+*   **Secure Authentication**: Stateless JWT authentication with secure refresh token rotation.
+*   **Role-Based Authorization**: Granular access control for `USER` and `ADMIN` roles.
+*   **RESTful Design**: Resource-oriented URLs, standard HTTP methods, and consistent JSON responses.
+*   **Pagination**: Efficient data retrieval for large datasets.
+*   **Input Validation**: Comprehensive validation using Jakarta Validation constraints.
+*   **Containerized**: Fully dockerized application and database using Docker Compose.
+*   **Testing**: High test coverage with JUnit 5, Mockito, and H2 in-memory database.
+*   **Documentation**: Auto-generated OpenAPI/Swagger documentation.
 
-The application follows a standard **Layered Architecture**:
+## Technology Stack
 
-1.  **Controller Layer**: Handles HTTP requests and responses.
-2.  **Service Layer**: Contains business logic and transaction management.
-3.  **Repository Layer**: Interacts with the database using Spring Data JPA.
-4.  **Entity Layer**: Represents database tables.
-5.  **DTO Layer**: Data Transfer Objects for request/response payloads.
-6.  **Security Layer**: Handles authentication and authorization filters.
+| Category | Technology |
+| :--- | :--- |
+| **Core** | Java 17, Spring Boot 3.x |
+| **Database** | PostgreSQL (Prod), H2 (Test), Spring Data JPA |
+| **Security** | Spring Security, JJWT (JSON Web Token) |
+| **Testing** | JUnit 5, Mockito, Spring Boot Test |
+| **DevOps** | Docker, Docker Compose, Maven |
+| **Docs** | SpringDoc OpenAPI (Swagger UI) |
 
-## 🛠 Setup Instructions
+## Getting Started
 
 ### Prerequisites
 
-*   Java 17 or higher
-*   Maven
-*   Docker & Docker Compose (optional, for containerized run)
+*   **Java 17+** installed
+*   **Maven** installed
+*   **Docker** & **Docker Compose** (Recommended)
 
-### Running Locally (with Maven)
+### Option 1: Run with Docker (Recommended)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd product-api
-    ```
+The easiest way to run the application is using Docker Compose, which provisions both the API and the PostgreSQL database.
 
-2.  **Configure Database:**
-    Ensure you have a PostgreSQL database running locally or update `src/main/resources/application.properties` with your database credentials.
-    
-    Alternatively, you can use the provided `docker-compose.yml` to spin up a database.
-
-3.  **Build and Run:**
-    ```bash
-    mvn clean install
-    mvn spring-boot:run
-    ```
-
-### Running with Docker Compose
-
-1.  **Build and Start Services:**
-    ```bash
-    docker-compose up --build
-    ```
-    This will start both the API (on port 8080) and the PostgreSQL database (on port 5432).
-
-## 📚 API Documentation
-
-Once the application is running, you can access the Swagger UI documentation at:
-
-*   **URL**: `http://localhost:8080/swagger-ui/index.html`
-*   **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
-
-## 🧪 Testing
-
-The project includes Unit and Integration tests using JUnit 5 and Mockito, utilizing an in-memory H2 database.
-
-To run the tests:
 ```bash
-mvn test
+# 1. Clone the repository
+git clone <repository-url>
+cd product-api
+
+# 2. Build and start services
+docker-compose up --build -d
 ```
 
-## 🔒 Security
+The API will be available at `http://localhost:8080`.
+
+### Option 2: Run Locally
+
+If you prefer running without Docker, ensure you have a PostgreSQL instance running locally. The application will use the dev profile and local credentials.
+
+1. **Set Environment Variables**
+```bash
+export DB_USERNAME=postgres
+export DB_PASSWORD=password
+export SPRING_PROFILES_ACTIVE=dev
+```
+2. **Build and Run Locally**
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+The API will be available at http://localhost:8080.
+
+## API Documentation
+
+Interactive API documentation is available via Swagger UI when the application is running.
+
+*   **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+*   **OpenAPI Spec**: http://localhost:8080/v3/api-docs
+
+### Core Endpoints
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/signup` | Register a new user | Public |
+| `POST` | `/api/v1/auth/login` | Authenticate and receive tokens | Public |
+| `POST` | `/api/v1/auth/refresh-token` | Rotate access token | Public |
+| `GET` | `/api/v1/products` | List products (Paginated) | Authenticated |
+| `POST` | `/api/v1/products` | Create a product | User/Admin |
+| `DELETE` | `/api/v1/products/{id}` | Delete a product | **Admin Only** |
+
+## Testing
+The project enforces code quality through Unit and Integration tests.  
+Tests are run with JUnit 5, Mockito, and Spring Boot Test.
+```bash
+# Run all tests
+mvn test
+```
+### Test Coverage:
+> After running the tests, a JaCoCo HTML report is generated at:
+`target/site/jacoco/index.html`
+
+![](docs/code-coverage.png)
+> Coverage shown is from the latest build.
+
+## Security
 
 *   **Authentication**: Implemented using JWT (JSON Web Tokens).
 *   **Refresh Token**: Supports token rotation for enhanced security.
@@ -89,7 +111,7 @@ mvn test
     *   `PUT /api/v1/products/{id}`: Accessible by `USER` or `ADMIN`.
     *   `DELETE /api/v1/products/{id}`: Accessible by `ADMIN` only.
 
-## 🗄 Database Schema
+## Database Schema
 
 **Product Table**
 *   `id`: Primary Key
@@ -104,7 +126,7 @@ mvn test
 *   `product_id`: Foreign Key
 *   `quantity`
 
-## 🐳 Docker Configuration
+## Docker Configuration
 
 *   **Dockerfile**: Multi-stage build (or simple JDK image) to package the application.
 *   **docker-compose.yml**: Orchestrates the Spring Boot API and PostgreSQL container.

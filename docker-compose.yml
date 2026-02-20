@@ -11,6 +11,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       db:
         condition: service_healthy
@@ -37,9 +38,11 @@ services:
       timeout: 5s
       retries: 5
 
+# Define volumes
+volumes:
+  postgres_data:
+
+# Define networks
 networks:
   product-network:
     driver: bridge
-
-volumes:
-  postgres_data:

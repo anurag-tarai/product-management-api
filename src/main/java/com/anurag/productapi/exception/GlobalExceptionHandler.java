@@ -21,18 +21,6 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
 
-    @ExceptionHandler(ForbiddenActionException.class)
-    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenActionException ex, WebRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getDescription(false).replace("uri=", ""))
-                .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
