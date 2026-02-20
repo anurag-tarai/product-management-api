@@ -57,4 +57,19 @@ public class ProductController {
         ProductResponse productResponse = productService.getProductByIdDTO(id);
         return ResponseEntity.ok(productResponse.getItems());
     }
+
+    // PUT update product
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> update(@PathVariable Integer id, @Valid @RequestBody ProductRequest request) {
+        return ResponseEntity.ok(productService.updateProductDTO(id, request));
+    }
+
+    // DELETE product
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
 }

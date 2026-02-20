@@ -8,6 +8,7 @@ import com.anurag.productapi.enums.Roles;
 import com.anurag.productapi.security.JwtUtils;
 import com.anurag.productapi.security.UserDetailsImpl;
 import com.anurag.productapi.service.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
+    private final NotificationService notificationService;
+
     @Override
     public void signup(SignupRequest request) {
 
@@ -34,9 +37,11 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userService.saveUser(user);
+        notificationService.sendWelcomeEmailAsync(user.getUsername());
     }
 
     @Override
+    @Transactional
     public JwtResponse login(LoginRequest request) {
 
         Authentication authentication =

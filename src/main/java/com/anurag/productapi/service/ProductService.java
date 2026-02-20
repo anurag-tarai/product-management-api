@@ -13,4 +13,8 @@ public interface ProductService {
     ProductResponse getProductByIdDTO(Integer id);
 
     ProductResponse createProductDTO(ProductRequest request);
+
+    ProductResponse updateProductDTO(Integer id, ProductRequest request);
+
+    void deleteProduct(Integer id);
 }
