@@ -40,6 +40,3 @@ Thumbs.db
 # Logs / temp
 *.log
 *.tmp
-
-# Optional: local properties containing secrets
-src/main/resources/application-*.properties
