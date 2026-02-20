@@ -40,8 +40,8 @@ The easiest way to run the application is using Docker Compose, which provisions
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
-cd product-api
+git clone https://github.com/anurag-tarai/product-management-api.git
+cd product-management-api
 
 # 2. Build and start services
 docker-compose up --build -d
